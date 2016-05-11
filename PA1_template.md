@@ -42,7 +42,7 @@ activity <- mutate(activity, Time = strptime( paste(date, "00:00:00"), format = 
 # Group the data by date, and summarize it for the histogram.
 activity <- group_by( activity, date)
 steps_per_day <- summarize( activity, total_steps = sum(steps, na.rm = TRUE))
-barchart(total_steps ~ date, steps_per_day, main = "Total number of steps taken each day", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
+barchart(total_steps ~ date, steps_per_day, main = "Total number of steps taken each day", xlab = "Date", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
@@ -114,7 +114,7 @@ print(paste("total number of missing values in the dataset is", num_na))
 activity_nna <- fill_na(activity, steps_per_intv)
 activity_nna <- group_by( activity_nna, date)
 steps_per_day_nna <- summarize( activity_nna, total_steps = sum(steps, na.rm = TRUE))
-barchart(total_steps ~ date, steps_per_day_nna, main = "Total number of steps taken each day(imputing missing values)", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
+barchart(total_steps ~ date, steps_per_day_nna, main = "Total number of steps taken each day(imputing missing values)",xlab = "Date", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
