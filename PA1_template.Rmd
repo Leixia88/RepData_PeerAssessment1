@@ -9,18 +9,23 @@ output:
 ## Loading and preprocessing the data
 ```{r echo = TRUE}
 library(dplyr)
+library(lattice)
 # Read the data into a data.frame by read.csv.
 # Add a new column "Time" indicating the full time in POSIXlt format for the row.
+if(!file.exists("activity.zip")){
+  fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+  download.file(fileUrl, destfile = "activity.zip", method = "curl")
+  unzip("activity.zip")
+}
 activity <- read.csv( "activity.csv")
 activity <- mutate(activity, Time = strptime( paste(date, "00:00:00"), format = "%Y-%m-%d %H:%M:%S") + 60 * interval )
 ```
-
 ## What is mean total number of steps taken per day?
 ```{r echo = TRUE}
 # Group the data by date, and summarize it for the histogram.
 activity <- group_by( activity, date)
 steps_per_day <- summarize( activity, total_steps = sum(steps, na.rm = TRUE))
-hist( steps_per_day$total_steps, xlab = "Steps taken each day", main = "Histogram of steps")
+barchart(total_steps ~ date, steps_per_day, main = "Total number of steps taken each day", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
 # Calculate the median and mean of the data.
 steps_median <- median( steps_per_day$total_steps, na.rm = TRUE)
 steps_avg <- mean( steps_per_day$total_steps, na.rm = TRUE)
@@ -58,20 +63,19 @@ print(paste("total number of missing values in the dataset is", num_na))
 activity_nna <- fill_na(activity, steps_per_intv)
 activity_nna <- group_by( activity_nna, date)
 steps_per_day_nna <- summarize( activity_nna, total_steps = sum(steps, na.rm = TRUE))
-hist( steps_per_day_nna$total_steps, xlab = "Steps taken each day", main = "Histogram of steps without missing value")
+barchart(total_steps ~ date, steps_per_day_nna, main = "Total number of steps taken each day(imputing missing values)", ylab = "Number of steps", scale = list(x=list(abbreviate = TRUE, rot = 90, cex = 0.5) ) )
+
+
 #Computing the mean and median number with the missing value filled.
 steps_median_nna <- median( steps_per_day_nna$total_steps, na.rm = TRUE)
 steps_avg_nna <- mean( steps_per_day_nna$total_steps, na.rm = TRUE)
 print( paste( "The mean of the total number of steps taken per day is", steps_avg_nna))
 print( paste( "The median of the total number of steps taken per day is", steps_median_nna))
-
-print("Imputting the missing data increase the steps of both mean and median per day.")
-print("Imputting the missing date also equalise the mean and median steps per day.")
+print("Imputting the missing date make the mean and median steps per day equal.")
 
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r echo = TRUE}
-library(lattice)
 # line 70 to 73 create a new column to indicate if the current date a weekday or weekend.
 activity_nna <- mutate( activity_nna, DayType = weekdays(Time) )
 weekendBool <- activity_nna["DayType"] == "Sunday" | activity_nna["DayType"] == "Saturday"
@@ -84,5 +88,5 @@ steps_per_intv <- summarize( activity_nna, avgStepsByWDays = mean( steps ) )
 # Use xyplot from lattice to create the output picture with two panel, weekend and weekday respectively.
 # Some points in the range of 300~500 are dissconected because of the avarage steps for the interval is zero, thus the log of
 # which is minus infinite.
-xyplot(log(avgStepsByWDays) ~ interval | DayType, steps_per_intv, layout = c(1,2), type = "l", ylab = "Number of steps")
+xyplot(avgStepsByWDays ~ interval | DayType, steps_per_intv, layout = c(1,2), type = "l", ylab = "Number of steps")
 ```
